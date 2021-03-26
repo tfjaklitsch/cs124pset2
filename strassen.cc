@@ -110,7 +110,13 @@ int** strassen(int dim, int** matrix_1, int** matrix_2) {
 		return matrix_mult(dim, matrix_1, matrix_2);
 	}
 	else {
-		int new_dim = dim/2;
+		int new_dim;
+		if (dim % 2 == 0) {
+			new_dim = dim/2;
+		}
+		else {
+			dim = (dim + 1)/2;
+		}
 
 		int** A = mat_split(new_dim, 1, matrix_1);
 		int** B = mat_split(new_dim, 2, matrix_1);
@@ -152,9 +158,16 @@ int main(int argc, char *argv[]) {
 		return 1;
 	}
 	clock_t begin = clock();
-
-	int** matrix_1 = create_mat(dim);
-	int** matrix_2 = create_mat(dim);
+	int** matrix_1;
+	int** matrix_2;
+	if (dim % 2 == 0) {
+		matrix_1 = create_mat(dim);
+		matrix_2 = create_mat(dim);
+	}
+	else {
+		matrix_1 = create_mat(dim+1);
+		matrix_2 = create_mat(dim+1);
+	}
 	for (int i = 0; i < dim; i++) {
 		for (int j = 0; j < dim; j++) {
 			fscanf(file, "%i", &matrix_1[i][j]);
