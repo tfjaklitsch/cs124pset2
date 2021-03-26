@@ -71,7 +71,11 @@ int** matrix_combine(int dim, int** top_l, int** top_r, int** bot_l, int** bot_r
 }
 
 int** mat_split(int dim, int quadrant, int** mat) {
-	int** split_mat = create_mat(dim);
+	int new_dim = dim;
+	if (new_dim % 2 != 0) {
+		new_dim += 1;
+	}
+	int** split_mat = create_mat(new_dim);
 	if (quadrant == 1) {
 		for (int i = 0; i < dim; i++) {
 			for (int j = 0; j < dim; j++) {
@@ -110,12 +114,10 @@ int** strassen(int dim, int** matrix_1, int** matrix_2) {
 		return matrix_mult(dim, matrix_1, matrix_2);
 	}
 	else {
-		int new_dim;
-		if (dim % 2 == 0) {
-			new_dim = dim/2;
-		}
-		else {
-			dim = (dim + 1)/2;
+		int new_dim = dim/2;
+		int fix_new_dim = new_dim;
+		if (fix_new_dim % 2 != 0) {
+			fix_new_dim += 1;
 		}
 
 		int** A = mat_split(new_dim, 1, matrix_1);
@@ -128,18 +130,18 @@ int** strassen(int dim, int** matrix_1, int** matrix_2) {
 		int** G = mat_split(new_dim, 3, matrix_2);
 		int** H = mat_split(new_dim, 4, matrix_2);
 
-		int** P1 = strassen(new_dim, A, matrix_add(new_dim, -1, F, H));
-		int** P2 = strassen(new_dim, matrix_add(new_dim, 1, A, B), H);
-		int** P3 = strassen(new_dim, matrix_add(new_dim, 1, C, D), E);
-		int** P4 = strassen(new_dim, D, matrix_add(new_dim, -1, G, E));
-		int** P5 = strassen(new_dim, matrix_add(new_dim, 1, A, D), matrix_add(new_dim, 1, E, H));
-		int** P6 = strassen(new_dim, matrix_add(new_dim, -1, B, D), matrix_add(new_dim, 1, G, H));
-		int** P7 = strassen(new_dim, matrix_add(new_dim, -1, A, C), matrix_add(new_dim, 1, E, F));
+		int** P1 = strassen(fix_new_dim, A, matrix_add(fix_new_dim, -1, F, H));
+		int** P2 = strassen(fix_new_dim, matrix_add(fix_new_dim, 1, A, B), H);
+		int** P3 = strassen(fix_new_dim, matrix_add(fix_new_dim, 1, C, D), E);
+		int** P4 = strassen(fix_new_dim, D, matrix_add(fix_new_dim, -1, G, E));
+		int** P5 = strassen(fix_new_dim, matrix_add(fix_new_dim, 1, A, D), matrix_add(fix_new_dim, 1, E, H));
+		int** P6 = strassen(fix_new_dim, matrix_add(fix_new_dim, -1, B, D), matrix_add(fix_new_dim, 1, G, H));
+		int** P7 = strassen(fix_new_dim, matrix_add(fix_new_dim, -1, A, C), matrix_add(fix_new_dim, 1, E, F));
 
-		int** top_l = matrix_add(new_dim, 1, P5, matrix_add(new_dim, 1, P6, matrix_add(new_dim, -1, P4, P2))); 
-		int** top_r = matrix_add(new_dim, 1, P1, P2);
-		int** bot_l = matrix_add(new_dim, 1, P3, P4);
-		int** bot_r = matrix_add(new_dim, 1, P5, matrix_add(new_dim, -1, P1, matrix_add(new_dim, 1, P3, P7)));
+		int** top_l = matrix_add(fix_new_dim, 1, P5, matrix_add(fix_new_dim, 1, P6, matrix_add(fix_new_dim, -1, P4, P2))); 
+		int** top_r = matrix_add(fix_new_dim, 1, P1, P2);
+		int** bot_l = matrix_add(fix_new_dim, 1, P3, P4);
+		int** bot_r = matrix_add(fix_new_dim, 1, P5, matrix_add(fix_new_dim, -1, P1, matrix_add(fix_new_dim, 1, P3, P7)));
 
 		return matrix_combine(new_dim, top_l, top_r, bot_l, bot_r);
 	}
@@ -152,22 +154,20 @@ int main(int argc, char *argv[]) {
 		return 1;
 	}
 	int dim = atoi(argv[2]);
+	int new_dim = dim;
 	FILE *file = fopen(argv[3], "r");
 	if (file == 0) {
 		fprintf(stderr, "Could not open input file");
 		return 1;
 	}
 	clock_t begin = clock();
-	int** matrix_1;
-	int** matrix_2;
-	if (dim % 2 == 0) {
-		matrix_1 = create_mat(dim);
-		matrix_2 = create_mat(dim);
+	if (new_dim % 2 != 0) {
+		new_dim += 1;
 	}
-	else {
-		matrix_1 = create_mat(dim+1);
-		matrix_2 = create_mat(dim+1);
-	}
+
+	int** matrix_1 = create_mat(new_dim);
+	int** matrix_2 = create_mat(new_dim);
+	
 	for (int i = 0; i < dim; i++) {
 		for (int j = 0; j < dim; j++) {
 			fscanf(file, "%i", &matrix_1[i][j]);
