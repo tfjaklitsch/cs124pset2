@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <time.h>
 
-int cross_point = 128;
+int cross_point = 32;
 
 int** create_mat(int dim) {
 	int** mat = 0;
@@ -178,7 +178,7 @@ int main(int argc, char *argv[]) {
 			fscanf(file, "%i", &matrix_2[i][j]);
 		}
 	}
-	int** result_mat = strassen(dim, matrix_1, matrix_2);
+	int** result_mat = strassen(new_dim, matrix_1, matrix_2);
 	for (int i = 0; i < dim; i++) {
 		fprintf(stdout, "%d\n", result_mat[i][i]);
 	}
