@@ -145,7 +145,6 @@ int main(int argc, char *argv[]) {
 		fprintf(stderr, "Error: expecting 3 arguments");
 		return 1;
 	}
-	fprintf(stdout, "check\n");
 	int dim = atoi(argv[2]);
 	FILE *file = fopen(argv[3], "r");
 	if (file == 0) {
