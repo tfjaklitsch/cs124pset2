@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <time.h>
 
-int cross_point = 32;
+int cross_point = 200;
 
 int** create_mat(int dim) {
 	int** mat = 0;
@@ -43,7 +43,7 @@ int** matrix_add(int dim, int add_sub, int** matrix_1, int** matrix_2) {
 		}
 	}
 	return sum_mat;
-}
+} 
 
 int** matrix_combine(int dim, int** top_l, int** top_r, int** bot_l, int** bot_r) {
 	int** mat = create_mat(2*dim);
@@ -153,40 +153,65 @@ int main(int argc, char *argv[]) {
 		fprintf(stderr, "Error: expecting 3 arguments");
 		return 1;
 	}
-	int dim = atoi(argv[2]);
-	int new_dim = dim;
-	FILE *file = fopen(argv[3], "r");
-	if (file == 0) {
-		fprintf(stderr, "Could not open input file");
-		return 1;
-	}
-	clock_t begin = clock();
-	if (new_dim % 2 != 0) {
-		new_dim += 1;
-	}
-
-	int** matrix_1 = create_mat(new_dim);
-	int** matrix_2 = create_mat(new_dim);
-	
-	for (int i = 0; i < dim; i++) {
-		for (int j = 0; j < dim; j++) {
-			fscanf(file, "%i", &matrix_1[i][j]);
+	int tri_calc = atoi(argv[1]);
+	if (tri_calc == 1) {
+		int** tri_mat = create_mat(1024);
+		int** tri_mat2 = create_mat(1024);
+		srand(time(NULL));
+		for (int i = 0; i < 1024; i++) {
+			for (int j = 0; j < i; j++) {
+				double r = ((double) rand() / (RAND_MAX));
+				double random = r - .99;
+				if (random > 0) {
+					tri_mat[i][j] = 1;
+					tri_mat[j][i] = 1;
+					tri_mat2[i][j] = 1;
+					tri_mat2[j][i] = 1;
+				}
+			}
 		}
-	}
-	for (int i = 0; i < dim; i++) {
-		for (int j = 0; j < dim; j++) {
-			fscanf(file, "%i", &matrix_2[i][j]);
+		int** new_mat = strassen(1024, tri_mat, tri_mat2);
+		int** final_mat = strassen(1024, new_mat, tri_mat);
+		double sum = 0;
+		for (int i = 0; i < 1024; i++) {
+			sum += final_mat[i][i];
 		}
+		fprintf(stdout, "%f\n", sum/6);
 	}
-	int** result_mat = strassen(new_dim, matrix_1, matrix_2);
-	for (int i = 0; i < dim; i++) {
-		fprintf(stdout, "%d\n", result_mat[i][i]);
-	}
-	
+	else {
+		int dim = atoi(argv[2]);
+		int new_dim = dim;
+		FILE *file = fopen(argv[3], "r");
+		if (file == 0) {
+			fprintf(stderr, "Could not open input file");
+			return 1;
+		}
+		clock_t begin = clock();
+		if (new_dim % 2 != 0) {
+			new_dim += 1;
+		}
 
-	clock_t end = clock();
-	double time = (double)(end - begin) / CLOCKS_PER_SEC;
-	// fprintf(stdout, "time taken %f", time);
+		int** matrix_1 = create_mat(new_dim);
+		int** matrix_2 = create_mat(new_dim);
+		
+		for (int i = 0; i < dim; i++) {
+			for (int j = 0; j < dim; j++) {
+				fscanf(file, "%i", &matrix_1[i][j]);
+			}
+		}
+		for (int i = 0; i < dim; i++) {
+			for (int j = 0; j < dim; j++) {
+				fscanf(file, "%i", &matrix_2[i][j]);
+			}
+		}
+		int** result_mat = strassen(new_dim, matrix_1, matrix_2);
+		for (int i = 0; i < dim; i++) {
+			fprintf(stdout, "%d\n", result_mat[i][i]);
+		}
+		
+
+		clock_t end = clock();
+		double time = (double)(end - begin) / CLOCKS_PER_SEC;
+		// fprintf(stdout, "time taken %f", time);
+	}
 }
-
-
